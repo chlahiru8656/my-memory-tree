@@ -1,5 +1,6 @@
 import { TreePine, Plus, Trees, Users, LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -18,10 +19,11 @@ interface AppSidebarProps {
 
 const AppSidebar = ({ onPlantMemory }: AppSidebarProps) => {
   const { signOut } = useAuth();
+  const navigate = useNavigate();
 
   const navItems = [
-    { title: "My Forest", icon: Trees, action: () => {} },
-    { title: "Social Grove", icon: Users, action: () => {} },
+    { title: "My Forest", icon: Trees, action: () => navigate("/") },
+    { title: "Social Grove", icon: Users, action: () => navigate("/social") },
   ];
 
   return (
