@@ -199,6 +199,14 @@ const PlantMemoryModal = ({ open, onOpenChange, onSuccess }: PlantMemoryModalPro
             </div>
           </div>
 
+          {/* Tag People */}
+          <div>
+            <Label className="text-foreground/80 font-body text-sm mb-2 block">
+              Tag People
+            </Label>
+            <UserTagSelector selectedUsers={taggedUsers} onChange={setTaggedUsers} />
+          </div>
+
           {/* Submit */}
           <Button
             onClick={handleSubmit}
