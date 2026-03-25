@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon, Upload, Sparkles, ImagePlus } from "lucide-react";
 import { toast } from "sonner";
+import UserTagSelector from "./UserTagSelector";
 
 interface PlantMemoryModalProps {
   open: boolean;
@@ -28,6 +29,7 @@ const PlantMemoryModal = ({ open, onOpenChange, onSuccess }: PlantMemoryModalPro
   const [emotion, setEmotion] = useState<string>("");
   const [date, setDate] = useState<Date>(new Date());
   const [loading, setLoading] = useState(false);
+  const [taggedUsers, setTaggedUsers] = useState<{ user_id: string; display_name: string | null; avatar_url: string | null }[]>([]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -74,6 +76,24 @@ const PlantMemoryModal = ({ open, onOpenChange, onSuccess }: PlantMemoryModalPro
 
       if (insertError) throw insertError;
 
+      // Get the inserted memory id for tagging
+      const { data: insertedMemory } = await supabase
+        .from("memories")
+        .select("id")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      // Insert tags
+      if (insertedMemory && taggedUsers.length > 0) {
+        const tags = taggedUsers.map((u) => ({
+          memory_id: insertedMemory.id,
+          tagged_user_id: u.user_id,
+        }));
+        await supabase.from("memory_tags").insert(tags);
+      }
+
       toast.success("Memory planted! 🌱");
       // Reset form
       setFile(null);
@@ -81,6 +101,7 @@ const PlantMemoryModal = ({ open, onOpenChange, onSuccess }: PlantMemoryModalPro
       setDescription("");
       setEmotion("");
       setDate(new Date());
+      setTaggedUsers([]);
       onOpenChange(false);
       onSuccess();
     } catch (err: any) {
@@ -176,6 +197,14 @@ const PlantMemoryModal = ({ open, onOpenChange, onSuccess }: PlantMemoryModalPro
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          {/* Tag People */}
+          <div>
+            <Label className="text-foreground/80 font-body text-sm mb-2 block">
+              Tag People
+            </Label>
+            <UserTagSelector selectedUsers={taggedUsers} onChange={setTaggedUsers} />
           </div>
 
           {/* Submit */}
